@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import BookCard from "@/components/BookCard";
 import FilterBar, { PageFilter, KuFilter } from "@/components/FilterBar";
 
@@ -20,18 +20,29 @@ export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
   const [pageFilter, setPageFilter] = useState<PageFilter>("all");
   const [kuFilter, setKuFilter] = useState<KuFilter>("all");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounce: wait 300ms after user stops typing before searching
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => setDebouncedSearch(value), 300);
+  }
 
   const fetchBooks = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams({ pages: pageFilter, ku: kuFilter });
+    if (debouncedSearch) params.set("search", debouncedSearch);
     const res = await fetch(`/api/books?${params}`);
     const data = await res.json();
     setBooks(data);
     setLoading(false);
-  }, [pageFilter, kuFilter]);
+  }, [pageFilter, kuFilter, debouncedSearch]);
 
   useEffect(() => {
     fetchBooks();
@@ -85,8 +96,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      {/* Search + Filters */}
+      <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-3">
+        {/* Search bar */}
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search by title or author..."
+            className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-pink-200 bg-white text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-300 transition"
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(""); setDebouncedSearch(""); }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
         <FilterBar
           pageFilter={pageFilter}
           kuFilter={kuFilter}
@@ -104,10 +135,14 @@ export default function Home() {
           </div>
         ) : books.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <p className="text-gray-400 text-lg">No books found.</p>
-            <p className="text-gray-400 text-sm">
-              Click <strong>Sync Books</strong> to pull data from Google Books.
+            <p className="text-gray-400 text-lg">
+              {debouncedSearch ? `No results for "${debouncedSearch}"` : "No books found."}
             </p>
+            {!debouncedSearch && (
+              <p className="text-gray-400 text-sm">
+                Click <strong>Sync Books</strong> to pull data from Google Books.
+              </p>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
