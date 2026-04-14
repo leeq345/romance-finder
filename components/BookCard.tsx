@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 interface Book {
   id: string;
@@ -16,7 +17,8 @@ interface Book {
 
 export default function BookCard({ book }: { book: Book }) {
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-200">
+    <Link href={`/book/${book.id}`} className="block">
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer">
       {/* Cover */}
       <div className="relative w-full h-64 bg-pink-50 flex items-center justify-center">
         {book.coverUrl ? (
@@ -75,5 +77,6 @@ export default function BookCard({ book }: { book: Book }) {
         )}
       </div>
     </div>
+    </Link>
   );
 }
