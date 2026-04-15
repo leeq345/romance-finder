@@ -69,7 +69,7 @@ npm install
 Create a `.env` file in the root:
 
 ```env
-DATABASE_URL="file:dev.db"
+DATABASE_URL="file:prisma/dev.db"
 GOOGLE_BOOKS_API_KEY=your_api_key_here
 ```
 
