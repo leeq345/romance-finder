@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fetchTopRomanceNovels } from "@/lib/googleBooks";
+import { requireAdminSecret } from "@/lib/auth";
 
-export async function POST() {
+export async function POST(request: Request) {
+  const authError = requireAdminSecret(request);
+  if (authError) return authError;
   try {
     const books = await fetchTopRomanceNovels();
 

@@ -48,10 +48,15 @@ export default function Home() {
     fetchBooks();
   }, [fetchBooks]);
 
+  const adminHeaders = {
+    "Content-Type": "application/json",
+    "x-admin-secret": process.env.NEXT_PUBLIC_ADMIN_SECRET ?? "",
+  };
+
   async function handleSync() {
     setSyncing(true);
     setSyncMsg("");
-    const res = await fetch("/api/sync", { method: "POST" });
+    const res = await fetch("/api/sync", { method: "POST", headers: adminHeaders });
     const data = await res.json();
     if (data.success) {
       setSyncMsg(`Done! Added ${data.added} new books, updated ${data.updated}.`);
@@ -67,7 +72,7 @@ export default function Home() {
     setBooks((prev) => prev.map((b) => (b.id === book.id ? updated : b)));
     await fetch("/api/toggle-ku", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: adminHeaders,
       body: JSON.stringify({ id: book.id, kindleUnlimited: updated.kindleUnlimited }),
     });
   }

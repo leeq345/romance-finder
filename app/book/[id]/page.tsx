@@ -38,7 +38,10 @@ export default function BookDetail() {
     setKuUpdating(true);
     const res = await fetch("/api/toggle-ku", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-secret": process.env.NEXT_PUBLIC_ADMIN_SECRET ?? "",
+      },
       body: JSON.stringify({ id: book.id, kindleUnlimited: !book.kindleUnlimited }),
     });
     const updated = await res.json();

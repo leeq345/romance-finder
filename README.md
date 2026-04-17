@@ -69,8 +69,9 @@ npm install
 Create a `.env` file in the root:
 
 ```env
-DATABASE_URL="file:prisma/dev.db"
+DATABASE_URL="file:dev.db"
 GOOGLE_BOOKS_API_KEY=your_api_key_here
+NEXT_PUBLIC_ADMIN_SECRET=choose_a_long_random_string
 ```
 
 > Get a free Google Books API key at [console.cloud.google.com](https://console.cloud.google.com) — enable the **Books API** and create a credential.
